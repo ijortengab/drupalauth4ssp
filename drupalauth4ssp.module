@@ -76,7 +76,10 @@ function drupalauth4ssp_user_logout($account) {
  * Implements hook_user_view().
  */
 function drupalauth4ssp_user_view($account, $view_mode, $langcode) {
-  _drupalauth4ssp_exec($account);
+  global $user;
+  if ($user->uid == $account->uid) {
+    _drupalauth4ssp_exec($account);
+  }
 }
 
 /**
