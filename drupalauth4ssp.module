@@ -124,7 +124,11 @@ function _drupalauth4ssp_get_simplesamlphp_config() {
     return;
   }
 
-  require_once $basedir . '/lib/_autoload.php';
+  if (!file_exists($basedir)) {
+    return;
+  }
+
+  require_once($basedir . '/lib/_autoload.php');
 
   $ssp_config = SimpleSAML_Configuration::getInstance();
 
