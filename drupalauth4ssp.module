@@ -56,17 +56,17 @@ function drupalauth4ssp_user_login(&$edit, $account) {
  */
 function drupalauth4ssp_user_logout($account) {
   // Get the configuration information from SimpleSAMLphp.
-  $sspConfig = _drupalauth4ssp_get_simplesamlphp_config();
+  $ssp_config = _drupalauth4ssp_get_simplesamlphp_config();
 
   // If we don't have configuration, exit without doing anything.
-  if (!is_array($sspConfig)) {
+  if (!is_array($ssp_config)) {
     // The least we can do is write something to the watchdog so someone will know what's happening.
     watchdog('drupalauth4ssp', 'Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', array('%name' => $account->name));
     return;
   }
 
   // Delete the cookie.
-  setcookie($sspConfig['cookie_name'], sha1($sspConfig['secretsalt'] . $account->uid) . ':' . $account->uid, time() - 3600, $sspConfig['baseurlpath']);
+  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->uid) . ':' . $account->uid, time() - 3600, $ssp_config['baseurlpath']);
 
   // Invalidate SimpleSAML session by expiring it.
   $session = SimpleSAML_Session::getSessionFromRequest();
@@ -110,26 +110,26 @@ function _drupalauth4ssp_get_simplesamlphp_config() {
     return;
   }
 
-  $sspConfig = SimpleSAML_Configuration::getInstance();
+  $ssp_config = SimpleSAML_Configuration::getInstance();
 
-  if (!is_object($sspConfig)) {
+  if (!is_object($ssp_config)) {
     return;
   }
 
   // Get the secretsalt.
-  $config['secretsalt'] = $sspConfig->getValue('secretsalt');
+  $config['secretsalt'] = $ssp_config->getValue('secretsalt');
 
-  // Get the baseurlpath
-  $config['baseurlpath'] = '/' . $sspConfig->getBaseURL();
+  // Get the baseurlpath.
+  $config['baseurlpath'] = '/' . $ssp_config->getBaseURL();
 
-  unset($sspConfig);
+  unset($ssp_config);
 
-  $sspAuthsources = SimpleSAML_Configuration::getConfig('authsources.php');
+  $ssp_authsources = SimpleSAML_Configuration::getConfig('authsources.php');
 
   // Get the cookie_name.
-  $config['cookie_name'] = $sspAuthsources->getValue('cookie_name', 'drupalauth4ssp');
+  $config['cookie_name'] = $ssp_authsources->getValue('cookie_name', 'drupalauth4ssp');
 
-  unset($sspAuthsources);
+  unset($ssp_authsources);
 
   // Make sure every configuration setting is present.
   foreach ($config as $val) {
@@ -150,19 +150,19 @@ function _drupalauth4ssp_get_simplesamlphp_config() {
 function _drupalauth4ssp_exec($account) {
 
   // Get the configuration information from SimpleSAMLphp.
-  $sspConfig = _drupalauth4ssp_get_simplesamlphp_config();
+  $ssp_config = _drupalauth4ssp_get_simplesamlphp_config();
 
   // If we don't have configuration, exit without doing anything.
-  if (!is_array($sspConfig)) {
+  if (!is_array($ssp_config)) {
     // The least we can do is write something to the watchdog so someone will know what's happening.
     watchdog('drupalauth4ssp', 'Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', array('%name' => $account->name));
     return;
   }
 
   // Store the authenticated user's uid in the cookie (create a validation hash to ensure nobody tampers with the uid).
-  setcookie($sspConfig['cookie_name'], sha1($sspConfig['secretsalt'] . $account->uid) . ':' . $account->uid, 0, $sspConfig['baseurlpath']);
+  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->uid) . ':' . $account->uid, 0, $ssp_config['baseurlpath']);
 
-  // if the ReturnTo URL is present, send the user to the URL.
+  // If the ReturnTo URL is present, send the user to the URL.
   if (isset($_GET['ReturnTo']) && $_GET['ReturnTo']) {
     header('Location: ' . $_GET['ReturnTo']);
     die;
