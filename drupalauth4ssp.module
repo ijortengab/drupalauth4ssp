@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * drupalauth4ssp module for Drupal.
@@ -7,7 +6,6 @@
  * This module tightly integrates the SimpleSAMLphp Identity Provider login experience with a Drupal site.
  *
  */
-
 
 /**
  * Implements hook_menu().
@@ -21,6 +19,7 @@ function drupalauth4ssp_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('drupalauth4ssp_settings'),
     'access arguments' => array('administer drupalauth4ssp'),
+    'file' => 'drupalauth4ssp.admin',
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
   );
 
@@ -46,12 +45,16 @@ function drupalauth4ssp_permission() {
   );
 }
 
-// implements hook_user_login()
+/**
+ * Implements hook_user_login().
+ */
 function drupalauth4ssp_user_login(&$edit, $account) {
   _drupalauth4ssp_exec($account);
 }
 
-// implements hook_user_logout()
+/**
+ * Implements hook_user_logout().
+ */
 function drupalauth4ssp_user_logout($account) {
 
   // Get the configuration information from SimpleSAMLphp
@@ -98,33 +101,6 @@ function drupalauth4ssp_user_view($account, $view_mode, $langcode) {
     _drupalauth4ssp_exec($account);
   }
 }
-
-/**
- * Implements settings for the module.
- */
-function drupalauth4ssp_settings() {
-
-  $form['drupalauth4ssp_setup'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Basic Setup'),
-    '#collapsible' => FALSE,
-  );
-  $form['drupalauth4ssp_setup']['drupalauth4ssp_installdir'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Installation directory (default: /var/simplesamlphp)'),
-    '#default_value' => variable_get('drupalauth4ssp_installdir', NULL),
-    '#description' => t('The base directory of simpleSAMLphp. Absolute path with no trailing slash.'),
-  );
-  $form['drupalauth4ssp_setup']['drupalauth4ssp_authsource'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Authentication source (The one that uses the drupalauth:External class)'),
-    '#default_value' => variable_get('drupalauth4ssp_authsource', NULL),
-    '#description' => t('The simpleSAMLphp authentication source.'),
-  );
-
-  return system_settings_form($form);
-}
-
 
 /**
  * Returns the SimpleSAMLphp configuration
