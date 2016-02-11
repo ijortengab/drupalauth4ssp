@@ -130,22 +130,11 @@ function drupalauth4ssp_settings() {
  * Returns the SimpleSAMLphp configuration
  */
 function _drupalauth4ssp_get_simplesamlphp_config() {
-
   $config = NULL;
 
-  // Get the simplesamlphp session.
-  $basedir = variable_get('drupalauth4ssp_installdir', NULL);
-
-  // if we don't have a va
-  if (!strlen($basedir)) {
+  if (!drupalauth4ssp_include_simplesamlphp_library()) {
     return;
   }
-
-  if (!file_exists($basedir)) {
-    return;
-  }
-
-  require_once($basedir . '/lib/_autoload.php');
 
   $sspConfig = SimpleSAML_Configuration::getInstance();
 
@@ -204,4 +193,24 @@ function _drupalauth4ssp_exec($account) {
     die;
   }
 
+}
+
+/**
+ * Include simpleSAMLphp library.
+ *
+ * @return bool
+ *   Display whether library has been included or not.
+ */
+function drupalauth4ssp_include_simplesamlphp_library() {
+  // Get the simplesamlphp session.
+  $basedir = variable_get('drupalauth4ssp_installdir', NULL);
+  $autoload_file = $basedir . '/lib/_autoload.php';
+
+  // If variable is not defined or dir is not exist.
+  if (!strlen($basedir) || !file_exists($basedir) || !file_exists($autoload_file)) {
+    return FALSE;
+  }
+  require_once($basedir . '/lib/_autoload.php');
+
+  return TRUE;
 }
