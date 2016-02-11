@@ -5,6 +5,11 @@
  */
 
 /**
+ * @addtogroup hooks
+ * @{
+ */
+
+/**
  * This hook provides ability to alter user attributes.
  *
  * @param array $attributes
@@ -16,3 +21,7 @@
 function hook_drupalauth_attributes_alter(&$attributes, &$user) {
   $attributes['my_attribute'] = 'value';
 }
+
+/**
+ * @} End of "addtogroup hooks".
+ */
