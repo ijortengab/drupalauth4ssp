@@ -178,7 +178,7 @@ function _drupalauth4ssp_exec($account) {
  */
 function drupalauth4ssp_include_simplesamlphp_library() {
   // Get the simplesamlphp session.
-  $basedir = variable_get('drupalauth4ssp_installdir', NULL);
+  $basedir = drupalauth4ssp_get_simplesamlphp_library_dir();
   $autoload_file = $basedir . '/lib/_autoload.php';
 
   // If variable is not defined or dir is not exist.
@@ -188,4 +188,18 @@ function drupalauth4ssp_include_simplesamlphp_library() {
   require_once $basedir . '/lib/_autoload.php';
 
   return TRUE;
+}
+
+/**
+ * Returns "installdir" variable.
+ */
+function drupalauth4ssp_get_simplesamlphp_library_dir() {
+  return variable_get('drupalauth4ssp_installdir', NULL);
+}
+
+/**
+ * Returns "drupalauth4ssp_authsource" variable.
+ */
+function drupalauth4ssp_get_simplesamlphp_authsource() {
+  return variable_get('drupalauth4ssp_authsource', NULL);
 }
