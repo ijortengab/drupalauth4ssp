@@ -19,7 +19,7 @@ function drupalauth4ssp_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('drupalauth4ssp_settings'),
     'access arguments' => array('administer drupalauth4ssp'),
-    'file' => 'drupalauth4ssp.admin',
+    'file' => 'drupalauth4ssp.admin.inc',
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
   );
 
