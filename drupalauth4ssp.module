@@ -70,7 +70,9 @@ function drupalauth4ssp_user_logout($account) {
 
   // Invalidate SimpleSAML session by expiring it.
   $session = SimpleSAML_Session::getSessionFromRequest();
-  $session->setAuthorityExpire($session->getAuthority(), 1);
+  foreach ($session->getAuthorities() as $authority) {
+    $session->setAuthorityExpire($authority, 1);
+  }
 
   // If the ReturnTo URL is present, send the user to the URL.
   if (isset($_GET['ReturnTo']) && $_GET['ReturnTo']) {
