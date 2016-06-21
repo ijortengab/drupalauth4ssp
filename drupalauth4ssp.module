@@ -73,7 +73,7 @@ function drupalauth4ssp_user_logout($account) {
   // Backward compatibility with SimpleSAMP older than 1.14.
   // SimpleSAML_Session::getAuthority() has been removed in 1.14.
   // @see https://simplesamlphp.org/docs/development/simplesamlphp-upgrade-notes-1.14
-  if (method_exists($session, 'setAuthorityExpire')) {
+  if (method_exists($session, 'getAuthority')) {
     $session->setAuthorityExpire($session->getAuthority(), 1);
   }
   else {
