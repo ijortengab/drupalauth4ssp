@@ -12,3 +12,10 @@ function drupalauth4ssp_uninstall() {
   variable_del('drupalauth4ssp_installdir');
   variable_del('drupalauth4ssp_authsource');
 }
+
+/**
+ * Add new setting for redirect restriction.
+ */
+function drupalauth4ssp_update_7000() {
+  variable_get('drupalauth4ssp_returnto_list', '*');
+}

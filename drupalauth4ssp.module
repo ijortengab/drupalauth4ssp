@@ -88,7 +88,7 @@ function drupalauth4ssp_user_logout($account) {
     $destination = $_GET['ReturnTo'];
 
     // Check the ReturnTo if it's in the allowed list.
-    if(!drupalauth4ssp_valid_returnto_parameter()) {
+    if (!drupalauth4ssp_valid_returnto_parameter()) {
       $destination = FALSE;
     }
   }
@@ -181,7 +181,7 @@ function _drupalauth4ssp_exec($account) {
   if (isset($_GET['ReturnTo']) && $_GET['ReturnTo']) {
 
     // Check the ReturnTo if it's in the allowed list.
-    if(!drupalauth4ssp_valid_returnto_parameter()) {
+    if (!drupalauth4ssp_valid_returnto_parameter()) {
       return;
     }
     header('Location: ' . $_GET['ReturnTo']);
