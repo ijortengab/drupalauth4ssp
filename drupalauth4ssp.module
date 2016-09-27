@@ -86,6 +86,11 @@ function drupalauth4ssp_user_logout($account) {
   if (isset($_GET['ReturnTo']) && $_GET['ReturnTo']) {
     $destination = &drupal_static(__FUNCTION__);
     $destination = $_GET['ReturnTo'];
+
+    // Check the ReturnTo if it's in the allowed list.
+    if(!drupalauth4ssp_valid_returnto_parameter()) {
+      $destination = FALSE;
+    }
   }
 }
 
@@ -174,6 +179,11 @@ function _drupalauth4ssp_exec($account) {
 
   // If the ReturnTo URL is present, send the user to the URL.
   if (isset($_GET['ReturnTo']) && $_GET['ReturnTo']) {
+
+    // Check the ReturnTo if it's in the allowed list.
+    if(!drupalauth4ssp_valid_returnto_parameter()) {
+      return;
+    }
     header('Location: ' . $_GET['ReturnTo']);
     die;
   }
@@ -212,4 +222,14 @@ function drupalauth4ssp_get_simplesamlphp_library_dir() {
  */
 function drupalauth4ssp_get_simplesamlphp_authsource() {
   return variable_get('drupalauth4ssp_authsource', NULL);
+}
+
+/**
+ * Check the ReturnTo query parameter if it's in the allowed list.
+ *
+ * @return bool
+ *   True if ReturnTo parameter is in the allowed list, False otherwise.
+ */
+function drupalauth4ssp_valid_returnto_parameter() {
+  return drupal_match_path($_GET['ReturnTo'], variable_get('drupalauth4ssp_returnto_list', ''));
 }
