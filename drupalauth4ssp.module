@@ -140,9 +140,10 @@ function _drupalauth4ssp_get_simplesamlphp_config() {
   unset($ssp_config);
 
   $ssp_authsources = SimpleSAML_Configuration::getConfig('authsources.php');
+  $authsource = $ssp_authsources->getValue(drupalauth4ssp_get_simplesamlphp_authsource());
 
-  // Get the cookie_name.
-  $config['cookie_name'] = $ssp_authsources->getValue('cookie_name', 'drupalauth4ssp');
+  // get cookie_name from specified authsource
+  $config['cookie_name'] = !empty($authsource['cookie_name']) ? $authsource['cookie_name'] : 'drupalauth4ssp';
 
   unset($ssp_authsources);
 
