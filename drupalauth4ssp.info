@@ -1,4 +1,0 @@
-name = "DrupalAuth for SimpleSAMLphp"
-description = "This module tightly integrates the SimpleSAMLphp Identity Provider login experience with a Drupal site."
-core = 7.x
-configure = admin/config/people/drupalauth4ssp
