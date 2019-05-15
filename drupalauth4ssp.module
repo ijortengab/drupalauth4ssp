@@ -6,31 +6,6 @@
  * This module tightly integrates the SimpleSAMLphp Identity Provider login experience with a Drupal site.
  */
 
-/**
- * Implements hook_menu().
- */
-function drupalauth4ssp_menu() {
-  $items = array();
-
-  $items['admin/config/people/drupalauth4ssp'] = array(
-    'title' => 'Drupalauth for SimpleSAMLphp Settings',
-    'description' => 'Control the various settings of the drupalauth4ssp module',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('drupalauth4ssp_settings'),
-    'access arguments' => array('administer drupalauth4ssp'),
-    'file' => 'drupalauth4ssp.admin.inc',
-    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-  );
-
-  return $items;
-}
-
-/**
- * Implements hook_admin_paths().
- */
-function drupalauth4ssp_admin_paths() {
-  return array('admin/config/people/drupalauth4ssp' => TRUE);
-}
 
 /**
  * Implements hook_user_login().
