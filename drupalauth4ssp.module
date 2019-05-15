@@ -33,18 +33,6 @@ function drupalauth4ssp_admin_paths() {
 }
 
 /**
- * Implements hook_permission().
- */
-function drupalauth4ssp_permission() {
-  return array(
-    'administer drupalauth4ssp' => array(
-      'title' => t('Administer drupalauth4ssp'),
-      'description' => t('Warning: Give to trusted roles only; this permission has security implications.'),
-    ),
-  );
-}
-
-/**
  * Implements hook_user_login().
  */
 function drupalauth4ssp_user_login(&$edit, $account) {
