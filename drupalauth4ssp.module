@@ -6,11 +6,14 @@
  * This module tightly integrates the SimpleSAMLphp Identity Provider login experience with a Drupal site.
  */
 
+use Drupal\Core\Routing\TrustedRedirectResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
 
 /**
  * Implements hook_user_login().
  */
-function drupalauth4ssp_user_login(&$edit, $account) {
+function drupalauth4ssp_user_login($account) {
   _drupalauth4ssp_exec($account);
 }
 
@@ -24,7 +27,7 @@ function drupalauth4ssp_user_logout($account) {
   // If we don't have configuration, exit without doing anything.
   if (!is_array($ssp_config)) {
     // The least we can do is write something to the watchdog so someone will know what's happening.
-    watchdog('drupalauth4ssp', 'Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', array('%name' => $account->name));
+    \Drupal::logger('drupalauth4ssp')->warning('Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', array('%name' => $account->name));
     return;
   }
 
@@ -32,7 +35,7 @@ function drupalauth4ssp_user_logout($account) {
   setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->uid) . ':' . $account->uid, time() - 3600, $ssp_config['baseurlpath']);
 
   // Invalidate SimpleSAML session by expiring it.
-  $session = SimpleSAML_Session::getSessionFromRequest();
+  $session = \SimpleSAML\Session::getSessionFromRequest();
   // Backward compatibility with SimpleSAMP older than 1.14.
   // SimpleSAML_Session::getAuthority() has been removed in 1.14.
   // @see https://simplesamlphp.org/docs/development/simplesamlphp-upgrade-notes-1.14
@@ -47,13 +50,15 @@ function drupalauth4ssp_user_logout($account) {
 
   // If the ReturnTo URL is present, send the user to the URL.
   if (isset($_GET['ReturnTo']) && $_GET['ReturnTo']) {
-    $destination = &drupal_static(__FUNCTION__);
-    $destination = $_GET['ReturnTo'];
 
+    $returnto_list =   \Drupal::service('config.factory')->get('drupalauth4ssp.settings')->get('returnto_list');
+    $path_matcher =   \Drupal::service('path.matcher');
     // Check the ReturnTo if it's in the allowed list.
-    if (!drupalauth4ssp_valid_returnto_parameter()) {
-      $destination = FALSE;
+    if ($path_matcher->matchPath($_GET['ReturnTo'], $returnto_list)) {
+      $destination = &drupal_static(__FUNCTION__);
+      $destination = $_GET['ReturnTo'];
     }
+
   }
 }
 
@@ -71,9 +76,8 @@ function drupalauth4ssp_drupal_goto_alter(&$path, &$options, &$http_response_cod
 /**
  * Implements hook_user_view().
  */
-function drupalauth4ssp_user_view($account, $view_mode, $langcode) {
-  global $user;
-  if ($user->uid == $account->uid) {
+function drupalauth4ssp_user_view($build, $account) {
+  if (\Drupal::currentUser()->id() == $account->id()) {
     _drupalauth4ssp_exec($account);
   }
 }
@@ -84,11 +88,7 @@ function drupalauth4ssp_user_view($account, $view_mode, $langcode) {
 function _drupalauth4ssp_get_simplesamlphp_config() {
   $config = NULL;
 
-  if (!drupalauth4ssp_include_simplesamlphp_library()) {
-    return;
-  }
-
-  $ssp_config = SimpleSAML_Configuration::getInstance();
+  $ssp_config = \SimpleSAML\Configuration::getInstance();
 
   if (!is_object($ssp_config)) {
     return;
@@ -98,26 +98,19 @@ function _drupalauth4ssp_get_simplesamlphp_config() {
   $config['secretsalt'] = $ssp_config->getValue('secretsalt');
 
   // Get the baseurlpath.
-  $config['baseurlpath'] = '/' . $ssp_config->getBaseURL();
+  $config['baseurlpath'] = $ssp_config->getBasePath();
 
   unset($ssp_config);
 
-  $ssp_authsources = SimpleSAML_Configuration::getConfig('authsources.php');
-  $authsource = $ssp_authsources->getValue(drupalauth4ssp_get_simplesamlphp_authsource());
+  $ssp_authsources = \SimpleSAML\Configuration::getConfig('authsources.php');
+
+  $authsource =   \Drupal::service('config.factory')->get('drupalauth4ssp.settings')->get('authsource');
+
 
   // get cookie_name from specified authsource
   $config['cookie_name'] = !empty($authsource['cookie_name']) ? $authsource['cookie_name'] : 'drupalauth4ssp';
 
   unset($ssp_authsources);
-
-  // Make sure every configuration setting is present.
-  foreach ($config as $val) {
-
-    if (!strlen($val)) {
-      return;
-    }
-
-  }
 
   return $config;
 
@@ -134,66 +127,38 @@ function _drupalauth4ssp_exec($account) {
   // If we don't have configuration, exit without doing anything.
   if (!is_array($ssp_config)) {
     // The least we can do is write something to the watchdog so someone will know what's happening.
-    watchdog('drupalauth4ssp', 'Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', array('%name' => $account->name));
+    \Drupal::logger('drupalauth4ssp')->warning('Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', array('%name' => $account->label()));
     return;
   }
 
   // Store the authenticated user's uid in the cookie (create a validation hash to ensure nobody tampers with the uid).
-  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->uid) . ':' . $account->uid, 0, $ssp_config['baseurlpath']);
+  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->id()) . ':' . $account->id(), 0, $ssp_config['baseurlpath']);
 
   // If the ReturnTo URL is present, send the user to the URL.
+  $request = \Drupal::request();
+  $ReturnTo = $request->query->get('ReturnTo');
   if (isset($_GET['ReturnTo']) && $_GET['ReturnTo']) {
 
+    $returnto_list =   \Drupal::service('config.factory')->get('drupalauth4ssp.settings')->get('returnto_list');
+    $path_matcher =   \Drupal::service('path.matcher');
     // Check the ReturnTo if it's in the allowed list.
-    if (!drupalauth4ssp_valid_returnto_parameter()) {
-      return;
+    $match = $path_matcher->matchPath($_GET['ReturnTo'], $returnto_list);
+    if ($match) {
+//    if ($path_matcher->matchPath($_GET['ReturnTo'], $returnto_list)) {
+      // see https://www.drupal.org/node/2023537
+//      return new RedirectResponse(\Drupal\Core\Url::fromUri($_GET['ReturnTo']));
+      $response =  new TrustedRedirectResponse($_GET['ReturnTo']);
+//      $response = new RedirectResponse($url->toString());
+      $request = \Drupal::request();
+      // Save the session so things like messages get saved.
+      $request->getSession()->save();
+      $response->prepare($request);
+      // Make sure to trigger kernel events.
+      \Drupal::service('kernel')->terminate($request, $response);
+      $response->send();
     }
-    header('Location: ' . $_GET['ReturnTo']);
-    die;
+
   }
 
 }
 
-/**
- * Include simpleSAMLphp library.
- *
- * @return bool
- *   Display whether library has been included or not.
- */
-function drupalauth4ssp_include_simplesamlphp_library() {
-  // Get the simplesamlphp session.
-  $basedir = drupalauth4ssp_get_simplesamlphp_library_dir();
-  $autoload_file = $basedir . '/lib/_autoload.php';
-
-  // If variable is not defined or dir is not exist.
-  if (!strlen($basedir) || !file_exists($basedir) || !file_exists($autoload_file)) {
-    return FALSE;
-  }
-  require_once $basedir . '/lib/_autoload.php';
-
-  return TRUE;
-}
-
-/**
- * Returns "installdir" variable.
- */
-function drupalauth4ssp_get_simplesamlphp_library_dir() {
-  return variable_get('drupalauth4ssp_installdir', NULL);
-}
-
-/**
- * Returns "drupalauth4ssp_authsource" variable.
- */
-function drupalauth4ssp_get_simplesamlphp_authsource() {
-  return variable_get('drupalauth4ssp_authsource', NULL);
-}
-
-/**
- * Check the ReturnTo query parameter if it's in the allowed list.
- *
- * @return bool
- *   True if ReturnTo parameter is in the allowed list, False otherwise.
- */
-function drupalauth4ssp_valid_returnto_parameter() {
-  return drupal_match_path($_GET['ReturnTo'], variable_get('drupalauth4ssp_returnto_list', ''));
-}
