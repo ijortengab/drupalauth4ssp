@@ -2,3 +2,8 @@ services:
   config:
     class: Drupal\drupalauth4ssp\Config
     arguments: ['@config.factory']
+
+  drupalauth4ssp.event_subscriber:
+    class: Drupal\drupalauth4ssp\EventSubscriber\DrupalAuthForSSPSubscriber
+    tags:
+      - { name: event_subscriber }

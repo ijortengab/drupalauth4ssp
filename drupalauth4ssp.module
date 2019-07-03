@@ -63,17 +63,6 @@ function drupalauth4ssp_user_logout($account) {
 }
 
 /**
- * Implements hook_drupal_goto_alter().
- */
-function drupalauth4ssp_drupal_goto_alter(&$path, &$options, &$http_response_code) {
-  $destination = &drupal_static('drupalauth4ssp_user_logout');
-  if (!$path && $destination) {
-    drupal_goto($destination);
-  }
-}
-
-
-/**
  * Implements hook_user_view().
  */
 function drupalauth4ssp_user_view($build, $account) {
