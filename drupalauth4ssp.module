@@ -23,6 +23,7 @@ function drupalauth4ssp_user_login($account) {
  * Implements hook_user_logout().
  */
 function drupalauth4ssp_user_logout($account) {
+  /** @var \Drupal\Core\Session\AccountProxy $account */
   // Get the configuration information from SimpleSAMLphp.
   $ssp_config = _drupalauth4ssp_get_simplesamlphp_config();
 
@@ -35,7 +36,7 @@ function drupalauth4ssp_user_logout($account) {
   }
 
   // Delete the cookie.
-  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->uid) . ':' . $account->uid, time() - 3600, $ssp_config['baseurlpath']);
+  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->id()) . ':' . $account->id(), time() - 3600, $ssp_config['baseurlpath']);
 
   // Invalidate SimpleSAML session by expiring it.
   $session = Session::getSessionFromRequest();
