@@ -2,13 +2,8 @@
 
 namespace Drupal\drupalauth4ssp\Form;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityFieldManagerInterface;
-use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\pathauto\AliasTypeManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure DrupalAuth for SimpleSAMLphp settings for this site.
@@ -45,7 +40,7 @@ class SettingsForm extends ConfigFormBase {
 
     $form['returnto_list'] = [
       '#type' => 'textarea',
-      '#title' => t('Allowed list of URLs for ReturnTo Parameter'),
+      '#title' => $this->t('Allowed list of URLs for ReturnTo Parameter'),
       '#default_value' => $this
         ->config('drupalauth4ssp.settings')
         ->get('returnto_list'),

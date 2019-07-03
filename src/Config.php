@@ -16,28 +16,28 @@ class Config {
    *
    * @var string
    */
-  private $cookie_name;
+  private $cookieName;
 
   /**
    * List of allowed URLs.
    *
    * @var string
    */
-  private $returnto_list;
+  private $returnToList;
 
   /**
    * SimpleSAMLphp secret salt.
    *
    * @var string
    */
-  private $secret_salt;
+  private $secretSalt;
 
   /**
-   * SimpleSAMLphp base path
+   * SimpleSAMLphp base path.
    *
    * @var string
    */
-  private $base_path;
+  private $basePath;
 
   /**
    * Constructs a config object.
@@ -47,50 +47,54 @@ class Config {
    */
   public function __construct(ConfigFactoryInterface $config_factory) {
     $config = $config_factory->get('drupalauth4ssp.settings');
-    $this->cookie_name = $config->get('cookie_name');;
-    $this->returnto_list = $config->get('returnto_list');;
+    $this->cookieName = $config->get('cookie_name');;
+    $this->returnToList = $config->get('returnto_list');;
 
     // Get the secretsalt.
-    $this->secret_salt = SimpleSAMLConfig::getSecretSalt();
+    $this->secretSalt = SimpleSAMLConfig::getSecretSalt();
 
     // Get the baseurlpath.
-    $this->base_path = SimpleSAMLConfiguration::getInstance()->getBasePath();
+    $this->basePath = SimpleSAMLConfiguration::getInstance()->getBasePath();
   }
 
   /**
    * Returns cookie name.
    *
    * @return string
+   *   Cookie name.
    */
   public function getCookieName() {
-    return $this->cookie_name;
+    return $this->cookieName;
   }
 
   /**
    * Returns allowed "return to" list.
    *
    * @return string
+   *   List of allowed return to URLs.
    */
   public function getReturnToList() {
-    return $this->returnto_list;
+    return $this->returnToList;
   }
 
   /**
    * Returns secret salt.
    *
    * @return string
+   *   Secret salt.
    */
   public function getSecretSalt() {
-    return $this->secret_salt;
+    return $this->secretSalt;
   }
 
   /**
    * Returns base path.
    *
    * @return string
+   *   Base path.
    */
   public function getBasePath() {
-    return $this->base_path;
+    return $this->basePath;
   }
 
 }

@@ -22,7 +22,7 @@ class DrupalAuthForSSPSubscriber implements EventSubscriberInterface {
    */
   public function checkRedirection(FilterResponseEvent $event) {
 
-    if ($event->getResponse() instanceOf RedirectResponse) {
+    if ($event->getResponse() instanceof RedirectResponse) {
       $response = $event->getResponse();
       $path = $response->getTargetUrl();
       $frontPage = Url::fromRoute('<front>')->setAbsolute()->toString();
