@@ -8,15 +8,30 @@
  * experience with a Drupal site.
  */
 
+use Drupal\Core\Url;
 use SimpleSAML\Configuration;
 use SimpleSAML\Session;
-use Drupal\Core\Routing\TrustedRedirectResponse;
 
 /**
  * Implements hook_user_login().
+ *
+ * Sets a special cookie for drupalauth SimpleSAMLphp module.
  */
 function drupalauth4ssp_user_login($account) {
-  _drupalauth4ssp_exec($account);
+  // Get the configuration information from SimpleSAMLphp.
+  $ssp_config = _drupalauth4ssp_get_simplesamlphp_config();
+
+  // If we don't have configuration, exit without doing anything.
+  if (!is_array($ssp_config)) {
+    // The least we can do is write something to the watchdog so someone will
+    // know what's happening.
+    \Drupal::logger('drupalauth4ssp')->warning('Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', ['%name' => $account->label()]);
+    return;
+  }
+
+  // Store the authenticated user's uid in the cookie (create a validation hash
+  // to ensure nobody tampers with the uid).
+  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->id()) . ':' . $account->id(), 0, $ssp_config['baseurlpath']);
 }
 
 /**
@@ -64,16 +79,6 @@ function drupalauth4ssp_user_logout($account) {
       $destination = &drupal_static(__FUNCTION__);
       $destination = $returnTo;
     }
-
-  }
-}
-
-/**
- * Implements hook_user_view().
- */
-function drupalauth4ssp_user_view($build, $account) {
-  if (\Drupal::currentUser()->id() == $account->id()) {
-    _drupalauth4ssp_exec($account);
   }
 }
 
@@ -107,46 +112,28 @@ function _drupalauth4ssp_get_simplesamlphp_config() {
   unset($ssp_authsources);
 
   return $config;
-
 }
 
 /**
- * Sets a special cookie for drupalauth4ssp.
+ * Implements hook_form_FORM_ID_alter().
  */
-function _drupalauth4ssp_exec($account) {
-  // Get the configuration information from SimpleSAMLphp.
-  $ssp_config = _drupalauth4ssp_get_simplesamlphp_config();
+function drupalauth4ssp_form_user_login_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+  $form['#submit'][] = 'drupalauth4ssp_user_login_submit';
+}
 
-  // If we don't have configuration, exit without doing anything.
-  if (!is_array($ssp_config)) {
-    // The least we can do is write something to the watchdog so someone will
-    // know what's happening.
-    \Drupal::logger('drupalauth4ssp')->warning('Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', ['%name' => $account->label()]);
-    return;
-  }
-
-  // Store the authenticated user's uid in the cookie (create a validation hash
-  // to ensure nobody tampers with the uid).
-  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->id()) . ':' . $account->id(), 0, $ssp_config['baseurlpath']);
-
+/**
+ * Sets redirect upon successful login.
+ */
+function drupalauth4ssp_user_login_submit($form, \Drupal\Core\Form\FormStateInterface $form_state) {
   // If the ReturnTo URL is present, send the user to the URL.
-  $request = \Drupal::request();
-  $returnTo = $request->query->get('ReturnTo');
+  $returnTo = \Drupal::request()->query->get('ReturnTo');
   if (!empty($returnTo)) {
-
     $returnto_list = \Drupal::service('config.factory')->get('drupalauth4ssp.settings')->get('returnto_list');
     $path_matcher = \Drupal::service('path.matcher');
     // Check the ReturnTo if it's in the allowed list.
     $match = $path_matcher->matchPath($returnTo, $returnto_list);
     if ($match) {
-      $response = new TrustedRedirectResponse($returnTo);
-      $request = \Drupal::request();
-      // Save the session so things like messages get saved.
-      $request->getSession()->save();
-      $response->prepare($request);
-      // Make sure to trigger kernel events.
-      \Drupal::service('kernel')->terminate($request, $response);
-      $response->send();
+      $form_state->setRedirectUrl(Url::fromUri($returnTo));
     }
   }
 }
