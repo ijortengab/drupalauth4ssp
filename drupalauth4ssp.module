@@ -8,6 +8,7 @@
  * experience with a Drupal site.
  */
 
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use SimpleSAML\Configuration;
 use SimpleSAML\Session;
@@ -18,6 +19,19 @@ use SimpleSAML\Session;
  * Sets a special cookie for drupalauth SimpleSAMLphp module.
  */
 function drupalauth4ssp_user_login($account) {
+  drupalauth4ssp_set_user_cookie($account);
+}
+
+/**
+ * Set auth cookie for the account.
+ *
+ * @param \Drupal\Core\Session\AccountInterface $account
+ *   User account.
+ *
+ * @todo Move to class and depend on SSP config service?
+ * @see _drupalauth4ssp_get_simplesamlphp_config()
+ */
+function drupalauth4ssp_set_user_cookie(AccountInterface $account) {
   // Get the configuration information from SimpleSAMLphp.
   $ssp_config = _drupalauth4ssp_get_simplesamlphp_config();
 
@@ -25,12 +39,14 @@ function drupalauth4ssp_user_login($account) {
   if (!is_array($ssp_config)) {
     // The least we can do is write something to the watchdog so someone will
     // know what's happening.
-    \Drupal::logger('drupalauth4ssp')->warning('Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', ['%name' => $account->label()]);
+    \Drupal::logger('drupalauth4ssp')
+      ->warning('Could not use drupalauth for %name, could not get the SimpleSAMLphp configuration.', ['%name' => $account->getAccountName()]);
     return;
   }
 
   // Store the authenticated user's uid in the cookie (create a validation hash
   // to ensure nobody tampers with the uid).
+  // @todo Set via request
   setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->id()) . ':' . $account->id(), 0, $ssp_config['baseurlpath']);
 }
 
@@ -84,6 +100,8 @@ function drupalauth4ssp_user_logout($account) {
 
 /**
  * Returns the SimpleSAMLphp configuration.
+ *
+ * @todo Convert to service?
  */
 function _drupalauth4ssp_get_simplesamlphp_config() {
   $config = NULL;
