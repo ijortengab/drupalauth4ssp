@@ -8,6 +8,7 @@
  * experience with a Drupal site.
  */
 
+use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
 use SimpleSAML\Configuration;
@@ -47,7 +48,8 @@ function drupalauth4ssp_set_user_cookie(AccountInterface $account) {
   // Store the authenticated user's uid in the cookie (create a validation hash
   // to ensure nobody tampers with the uid).
   // @todo Set via request
-  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->id()) . ':' . $account->id(), 0, $ssp_config['baseurlpath']);
+  $hash = Crypt::hmacBase64($account->id(), $ssp_config['secretsalt'] . \Drupal::service('private_key')->get());
+  setcookie($ssp_config['cookie_name'], $hash . ':' . $account->id(), 0, $ssp_config['baseurlpath']);
 }
 
 /**
@@ -67,7 +69,8 @@ function drupalauth4ssp_user_logout($account) {
   }
 
   // Delete the cookie.
-  setcookie($ssp_config['cookie_name'], sha1($ssp_config['secretsalt'] . $account->id()) . ':' . $account->id(), time() - 3600, $ssp_config['baseurlpath']);
+  $hash = Crypt::hmacBase64($account->id(), $ssp_config['secretsalt'] . \Drupal::service('private_key')->get());
+  setcookie($ssp_config['cookie_name'], $hash . ':' . $account->id(), time() - 3600, $ssp_config['baseurlpath']);
 
   // Invalidate SimpleSAML session by expiring it.
   $session = Session::getSessionFromRequest();
