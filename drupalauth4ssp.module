@@ -125,7 +125,7 @@ function _drupalauth4ssp_get_simplesamlphp_config() {
 
   $ssp_authsources = Configuration::getConfig('authsources.php');
 
-  $authsource = \Drupal::service('config.factory')->get('drupalauth4ssp.settings')->get('authsource');
+  $authsource = $ssp_authsources->getValue(\Drupal::service('config.factory')->get('drupalauth4ssp.settings')->get('authsource'));
 
   // Get cookie_name from specified authsource.
   $config['cookie_name'] = !empty($authsource['cookie_name']) ? $authsource['cookie_name'] : 'drupalauth4ssp';

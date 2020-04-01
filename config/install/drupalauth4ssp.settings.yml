@@ -1,2 +1,2 @@
-cookie_name: drupalauth4ssp
+authsource: drupal-userpass
 returnto_list: '*'

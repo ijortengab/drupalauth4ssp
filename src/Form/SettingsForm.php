@@ -28,13 +28,13 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form['cookie_name'] = [
+    $form['authsource'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Cookie name'),
+      '#title' => $this->t('Authsource'),
       '#default_value' => $this
         ->config('drupalauth4ssp.settings')
-        ->get('cookie_name'),
-      '#description' => $this->t('Set cookie name configured in the SimpleSAMLphp authentication source(the one that uses the "drupalauth:External" class).'),
+        ->get('authsource'),
+      '#description' => $this->t('The machine name of the authsource used in SimpleSAMLphp.'),
       '#required' => TRUE,
     ];
 
@@ -56,7 +56,7 @@ class SettingsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->config('drupalauth4ssp.settings')
-      ->set('cookie_name', $form_state->getValue('cookie_name'))
+      ->set('authsource', $form_state->getValue('authsource'))
       ->set('returnto_list', $form_state->getValue('returnto_list'))
       ->save();
     parent::submitForm($form, $form_state);
