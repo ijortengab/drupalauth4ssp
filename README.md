@@ -24,3 +24,28 @@ The configuration of the module is fairly straight forward - you will need to kn
 
 * Issue queue: https://drupal.org/project/issues/drupalauth4ssp
 * Chat: https://drupalchat.me/channel/drupalauth4ssp
+
+
+## Log out flow for single logout
+
+### SP initiated
+
+1. Destroys session for SP
+1. Calls External::logout
+1. ^ redirects to "drupal_logout_url" with ReturnTo = "http://idp-drupal8-contrib.devtools/simplesaml/module.php/core/idp/resumelogout.php?id={STATE_ID}"
+1. IdP logs out rest of associated SPs
+1. redirect to original SP that requested logout
+
+### IdP initiated
+
+1. Logout out of Drupal
+1. Redirect to IdP SLS
+1. Redirect to /simplesaml/module.php/core/idp/resumelogout.php?id={STATE_ID} and start logging out SPs
+1. Log out from IdP
+1. Redirect to ReturnTo
+
+
+### TODO
+
+1. Extend config for IdP initiated logout redirect
+1. Test with some logout redirect modules

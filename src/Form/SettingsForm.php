@@ -48,7 +48,28 @@ class SettingsForm extends ConfigFormBase {
       '#required' => TRUE,
     ];
 
+    $form['idp_logout_returnto'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('IdP-initiated logout redirect URL'),
+      '#default_value' => $this
+        ->config('drupalauth4ssp.settings')
+        ->get('idp_logout_returnto'),
+      '#description' => $this->t('Url where to return the user after SimpleSAMLphp will finish logout process.'),
+    ];
+
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    $returnTo = $form_state->getValue('idp_logout_returnto');
+    try {
+      \SimpleSAML\Utils\HTTP::checkURLAllowed($returnTo);
+    } catch (\Exception $exception) {
+      $form_state->setErrorByName('idp_logout_returnto', $exception->getMessage());
+    }
   }
 
   /**
@@ -58,6 +79,7 @@ class SettingsForm extends ConfigFormBase {
     $this->config('drupalauth4ssp.settings')
       ->set('authsource', $form_state->getValue('authsource'))
       ->set('returnto_list', $form_state->getValue('returnto_list'))
+      ->set('idp_logout_returnto', $form_state->getValue('idp_logout_returnto'))
       ->save();
     parent::submitForm($form, $form_state);
   }

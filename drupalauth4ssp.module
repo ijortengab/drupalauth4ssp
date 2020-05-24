@@ -86,12 +86,18 @@ function drupalauth4ssp_user_logout($account) {
     }
   }
 
+  $drupaluath4ssp_settings = \Drupal::service('config.factory')->get('drupalauth4ssp.settings');
   $request = \Drupal::request();
   $returnTo = $request->query->get('ReturnTo');
-  // If the ReturnTo URL is present, send the user to the URL.
-  if (!empty($returnTo)) {
-
-    $returnto_list = \Drupal::service('config.factory')->get('drupalauth4ssp.settings')->get('returnto_list');
+  if (empty($returnTo)) {
+    // IdP-initiated logout.
+    $destination = &drupal_static(__FUNCTION__);
+    $idp_logout_returnto = $drupaluath4ssp_settings->get('idp_logout_returnto');
+    $destination = $ssp_config['baseurlpath'] . 'saml2/idp/SingleLogoutService.php?ReturnTo=' . $idp_logout_returnto;
+  }
+  else {
+    // If the ReturnTo URL is present, send the user to the URL.
+    $returnto_list = $drupaluath4ssp_settings->get('returnto_list');
     $path_matcher = \Drupal::service('path.matcher');
     // Check the ReturnTo if it's in the allowed list.
     if ($path_matcher->matchPath($returnTo, $returnto_list)) {
