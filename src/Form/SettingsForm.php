@@ -40,7 +40,7 @@ class SettingsForm extends ConfigFormBase {
 
     $form['returnto_list'] = [
       '#type' => 'textarea',
-      '#title' => $this->t('Allowed list of URLs for ReturnTo Parameter'),
+      '#title' => $this->t('Allowed list of URLs for ReturnTo Parameter for service provider initiated logout'),
       '#default_value' => $this
         ->config('drupalauth4ssp.settings')
         ->get('returnto_list'),
@@ -54,7 +54,7 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => $this
         ->config('drupalauth4ssp.settings')
         ->get('idp_logout_returnto'),
-      '#description' => $this->t('Url where to return the user after SimpleSAMLphp will finish logout process.'),
+      '#description' => $this->t('URL where to return the user after SimpleSAMLphp will finish logout process. Leave empty to return to the home page.'),
     ];
 
     return parent::buildForm($form, $form_state);
