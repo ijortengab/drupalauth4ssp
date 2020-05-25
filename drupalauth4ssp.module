@@ -93,6 +93,9 @@ function drupalauth4ssp_user_logout($account) {
     // IdP-initiated logout.
     $destination = &drupal_static(__FUNCTION__);
     $idp_logout_returnto = $drupaluath4ssp_settings->get('idp_logout_returnto');
+    if (empty($idp_logout_returnto)) {
+      $idp_logout_returnto = base_path();
+    }
     $destination = $ssp_config['baseurlpath'] . 'saml2/idp/SingleLogoutService.php?ReturnTo=' . $idp_logout_returnto;
   }
   else {
