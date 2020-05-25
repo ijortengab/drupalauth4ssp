@@ -2,6 +2,7 @@
 
 namespace Drupal\drupalauth4ssp\Form;
 
+use SimpleSAML\Utils\HTTP;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -66,8 +67,9 @@ class SettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $returnTo = $form_state->getValue('idp_logout_returnto');
     try {
-      \SimpleSAML\Utils\HTTP::checkURLAllowed($returnTo);
-    } catch (\Exception $exception) {
+      HTTP::checkURLAllowed($returnTo);
+    }
+    catch (\Exception $exception) {
       $form_state->setErrorByName('idp_logout_returnto', $exception->getMessage());
     }
   }
