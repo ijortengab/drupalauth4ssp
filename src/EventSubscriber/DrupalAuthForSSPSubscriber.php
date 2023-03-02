@@ -7,7 +7,7 @@ use Drupal\Core\Url;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -35,10 +35,10 @@ class DrupalAuthForSSPSubscriber implements EventSubscriberInterface {
   /**
    * Kernel response event handler.
    *
-   * @param \Symfony\Component\HttpKernel\Event\FilterResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\ResponseEvent $event
    *   Response event.
    */
-  public function checkRedirection(FilterResponseEvent $event) {
+  public function checkRedirection(ResponseEvent $event) {
 
     if ($event->getResponse() instanceof RedirectResponse) {
       $response = $event->getResponse();

@@ -8,6 +8,7 @@
  * experience with a Drupal site.
  */
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Url;
@@ -147,14 +148,14 @@ function _drupalauth4ssp_get_simplesamlphp_config() {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function drupalauth4ssp_form_user_login_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+function drupalauth4ssp_form_user_login_form_alter(&$form, FormStateInterface $form_state) {
   $form['#submit'][] = 'drupalauth4ssp_user_login_submit';
 }
 
 /**
  * Sets redirect upon successful login.
  */
-function drupalauth4ssp_user_login_submit($form, \Drupal\Core\Form\FormStateInterface $form_state) {
+function drupalauth4ssp_user_login_submit($form, FormStateInterface $form_state) {
   // If the ReturnTo URL is present, send the user to the URL.
   $returnTo = \Drupal::request()->query->get('ReturnTo');
   if (!empty($returnTo)) {

@@ -67,7 +67,8 @@ class SettingsForm extends ConfigFormBase {
   public function validateForm(array &$form, FormStateInterface $form_state) {
     $returnTo = $form_state->getValue('idp_logout_returnto');
     try {
-      HTTP::checkURLAllowed($returnTo);
+      $http = new HTTP();
+      $http->checkURLAllowed($returnTo);
     }
     catch (\Exception $exception) {
       $form_state->setErrorByName('idp_logout_returnto', $exception->getMessage());

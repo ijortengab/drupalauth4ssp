@@ -7,7 +7,7 @@ use SimpleSAML\Configuration as SimpleSAMLConfiguration;
 use SimpleSAML\Utils\Config as SimpleSAMLConfig;
 
 /**
- * Config service.
+ * The Config service.
  */
 class Config {
 
@@ -47,8 +47,8 @@ class Config {
    */
   public function __construct(ConfigFactoryInterface $config_factory) {
     $config = $config_factory->get('drupalauth4ssp.settings');
-    $this->cookieName = $config->get('cookie_name');;
-    $this->returnToList = $config->get('returnto_list');;
+    $this->cookieName = $config->get('cookie_name');
+    $this->returnToList = $config->get('returnto_list');
 
     // Get the secretsalt.
     $this->secretSalt = SimpleSAMLConfig::getSecretSalt();
